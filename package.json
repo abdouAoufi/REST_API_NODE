@@ -1,0 +1,25 @@
+{
+  "name": "rest-api",
+  "version": "1.0.0",
+  "description": "rest api used for educational purpose",
+  "main": "i",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/abdouAoufi/REST_API_NODE.git"
+  },
+  "keywords": [
+    "api"
+  ],
+  "author": "abdou",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/abdouAoufi/REST_API_NODE/issues"
+  },
+  "homepage": "https://github.com/abdouAoufi/REST_API_NODE#readme",
+  "dependencies": {
+    "express": "^4.17.1"
+  }
+}
