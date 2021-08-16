@@ -14,9 +14,13 @@ const postSchema = new Schema({
         type: String,
         required: true
     },
+    creator: {
+        type: Object,
+        required: true
+    }
 
 }, {
     timestamps: true
 });
 
-module.exports = mongoose.model(postSchema);
+module.exports = mongoose.model("Post", postSchema);

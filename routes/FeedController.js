@@ -7,10 +7,12 @@ const router = express.Router();
 
 router.get("/posts", needController.getPosts);
 router.post("/post", [body("title").isString().isLength({
-    min: 5
+    min: 7
 }).withMessage("Invalid title!"), body("content").isString().isLength({
-    min: 10
+    min: 5
 }).withMessage("Invalid content!")], needController.createPost);
+
+router.get("/post/:postId", needController.getPost);
 
 
 module.exports = router;
