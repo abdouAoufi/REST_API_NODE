@@ -26,6 +26,7 @@ router.post(
 
 router.post(
   "/post",
+  isAuth,
   [
     body("title")
       .isString()
@@ -42,8 +43,8 @@ router.post(
   ],
   needController.createPost
 );
-router.get("/delete/:postId", needController.deletePost);
+router.get("/delete/:postId", isAuth, needController.deletePost);
 
-router.get("/post/:postId", needController.getPost);
+router.get("/post/:postId", isAuth, needController.getPost);
 
 module.exports = router;
