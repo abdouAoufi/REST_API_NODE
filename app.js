@@ -5,8 +5,7 @@ const authRouter = require("./routes/authRouter");
 const mongoose = require("mongoose");
 const path = require("path");
 const multer = require("multer");
-
-
+const Socket = require("./socket");
 const app = express();
 
 // storage configuration
@@ -40,10 +39,18 @@ mongoose
   })
   .then(() => {
     console.log("The server running on 127.0.0.1:8080");
-    app.listen(8080);
+    const server = app.listen(8080);
+    // const io = require("./socket").init(server); // return io which is websocket ....
+    // io.on("connection", (socket) => {
+    //   console.log("Client connected")
+    // });
+    const io = Socket.init(server);
+
+    io.on("connection", (socket) => {
+      console.log("Client connected!");
+    });
   })
   .catch((err) => console.log(err));
-
 
 app.use(bodyParser.json()); // to accept json data
 app.use("/images", express.static(path.join(__dirname, "images"))); // construct absolut path

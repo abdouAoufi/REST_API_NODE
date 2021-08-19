@@ -1,18 +1,14 @@
 const fs = require("fs");
 const path = require("path");
 const User = require("../models/User");
+const { validationResult } = require("express-validator");
+const Socket = require("../socket");
 
 exports.getPosts = async (req, res, next) => {
-  const currentPage = req.query.page || 1;
-  const perPage = 2;
   try {
-    const totalItems = await Post.find().countDocuments();
-    const posts = await Post.find()
-      .skip((currentPage - 1) * perPage)
-      .limit(perPage);
+    const posts = await Post.find().populate("creator").sort({ createdAt: -1 });
     res.status(200).json({
       posts: posts,
-      totalPosts: totalItems,
     });
   } catch (err) {
     if (!err.statusCode) {
@@ -22,11 +18,10 @@ exports.getPosts = async (req, res, next) => {
   }
 };
 
-const { validationResult } = require("express-validator");
-
 const Post = require("../models/Post");
 
 exports.createPost = (req, res, next) => {
+  const io = Socket.getIO();
   const error = validationResult(req);
   if (!error.isEmpty()) {
     const error = new Error("Validation failed, entred data is incorrect!!");
@@ -48,10 +43,12 @@ exports.createPost = (req, res, next) => {
     imageUrl: imageUrl,
     creator: userId,
   });
+  let postt;
   let creator;
   post
     .save()
     .then((post) => {
+      post = postt;
       return User.findById(userId);
     })
     .then((user) => {
@@ -62,13 +59,13 @@ exports.createPost = (req, res, next) => {
       }
       creator = user;
       user.posts.push(post);
-      return user.save();
-    })
-    .then((result) => {
-      res.status(201).json({
-        message: "Post created successfully",
-        post: post,
-        creator: { _id: creator._id, name: creator.name },
+      user.save().then((result) => {
+        io.emit("posts", { action: "create", post: post });
+        res.status(201).json({
+          message: "Post created successfully",
+          post: post,
+          creator: { _id: creator._id, name: creator.name },
+        });
       });
     })
     .catch((err) => {
