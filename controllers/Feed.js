@@ -2,32 +2,24 @@ const fs = require("fs");
 const path = require("path");
 const User = require("../models/User");
 
-exports.getPosts = (req, res, next) => {
+exports.getPosts = async (req, res, next) => {
   const currentPage = req.query.page || 1;
   const perPage = 2;
-  let totalItems;
-  Post.find()
-    .countDocuments()
-    .then((count) => {
-      totalItems = count;
-      Post.find()
-        .skip((currentPage - 1) * perPage)
-        .limit(perPage)
-        .then((posts) => {
-          res.status(200).json({
-            posts: posts,
-            totalPosts: totalItems,
-          });
-        })
-        .catch((err) => {
-          console.log(err);
-          if (err.statusCode) {
-            err.status = 500;
-          }
-          next(err);
-        });
-    })
-    .catch((err) => {});
+  try {
+    const totalItems = await Post.find().countDocuments();
+    const posts = await Post.find()
+      .skip((currentPage - 1) * perPage)
+      .limit(perPage);
+    res.status(200).json({
+      posts: posts,
+      totalPosts: totalItems,
+    });
+  } catch (err) {
+    if (!err.statusCode) {
+      err.statusCode = 500;
+    }
+    next(err);
+  }
 };
 
 const { validationResult } = require("express-validator");
@@ -87,26 +79,25 @@ exports.createPost = (req, res, next) => {
     });
 };
 
-exports.getPost = (req, res, next) => {
+exports.getPost = async (req, res, next) => {
   const postId = req.params.postId;
-  Post.findById(postId)
-    .then((post) => {
-      if (!post) {
-        const error = new Error("Not found error");
-        error.statusCode = 404;
-        throw error;
-      }
-      return res.status(200).json({
-        message: "Post fetched",
-        post: post,
-      });
-    })
-    .catch((err) => {
-      if (err.statusCode) {
-        err.status = 500;
-      }
-      next(err);
+  try {
+    const post = await Post.findById(postId);
+    if (!post) {
+      const error = new Error("Not found error");
+      error.statusCode = 404;
+      throw error;
+    }
+    res.status(200).json({
+      message: "Post fetched",
+      post: post,
     });
+  } catch (error) {
+    if (!error.statusCode) {
+      error.statusCode = 500;
+    }
+    next(err);
+  }
 };
 
 exports.updatePost = (req, res, next) => {

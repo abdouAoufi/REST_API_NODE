@@ -1,13 +1,15 @@
 const express = require("express");
 const bodyParser = require("body-parser");
-const router = require("./routes/FeedController");
+const feedRouter = require("./routes/feedRouter");
 const authRouter = require("./routes/authRouter");
-const app = express();
 const mongoose = require("mongoose");
 const path = require("path");
 const multer = require("multer");
 
-// storeage configuration
+
+const app = express();
+
+// storage configuration
 const fileStorage = multer.diskStorage({
   destination: (req, file, cb) => {
     cb(null, "images");
@@ -42,6 +44,7 @@ mongoose
   })
   .catch((err) => console.log(err));
 
+
 app.use(bodyParser.json()); // to accept json data
 app.use("/images", express.static(path.join(__dirname, "images"))); // construct absolut path
 app.use(
@@ -62,5 +65,5 @@ app.use((error, req, res, next) => {
   res.status(status).json({ message: error.message, data: data });
 });
 
-app.use("/feed", router);
+app.use("/feed", feedRouter);
 app.use("/auth", authRouter);
