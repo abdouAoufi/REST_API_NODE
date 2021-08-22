@@ -1,14 +1,14 @@
 const express = require("express");
 const bodyParser = require("body-parser");
-const feedRouter = require("./routes/feedRouter");
-const authRouter = require("./routes/authRouter");
 const mongoose = require("mongoose");
 const path = require("path");
 const multer = require("multer");
-const Socket = require("./socket");
 const app = express();
+const {graphqlHTTP} = require("express-graphql");
+const graphQlSchema = require("./graphql/schema");
+const graphQlResolver = require("./graphql/resolvers");
 
-// storage configuration
+// storage configuration....
 const fileStorage = multer.diskStorage({
   destination: (req, file, cb) => {
     cb(null, "images");
@@ -39,17 +39,9 @@ mongoose
   })
   .then(() => {
     console.log("The server running on 127.0.0.1:8080");
-    const server = app.listen(8080);
-    // const io = require("./socket").init(server); // return io which is websocket ....
-    // io.on("connection", (socket) => {
-    //   console.log("Client connected")
-    // });
-    const io = Socket.init(server);
-
-    io.on("connection", (socket) => {
-      console.log("Client connected!");
-    });
+    app.listen(8080);
   })
+
   .catch((err) => console.log(err));
 
 app.use(bodyParser.json()); // to accept json data
@@ -58,6 +50,12 @@ app.use(
   multer({ storage: fileStorage, fileFilter: fileFilter }).single("image")
 );
 
+app.use(
+  "/graphql",
+  graphqlHTTP({ schema: graphQlSchema, rootValue: graphQlResolver })
+);
+
+// cross origine request security
 app.use((req, res, next) => {
   res.setHeader("Access-Control-Allow-Origin", "*");
   res.setHeader("Access-Control-Allow-Method", "*");
@@ -71,6 +69,3 @@ app.use((error, req, res, next) => {
   const data = error.data;
   res.status(status).json({ message: error.message, data: data });
 });
-
-app.use("/feed", feedRouter);
-app.use("/auth", authRouter);
