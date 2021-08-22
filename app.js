@@ -4,7 +4,7 @@ const mongoose = require("mongoose");
 const path = require("path");
 const multer = require("multer");
 const app = express();
-const {graphqlHTTP} = require("express-graphql");
+const { graphqlHTTP } = require("express-graphql");
 const graphQlSchema = require("./graphql/schema");
 const graphQlResolver = require("./graphql/resolvers");
 
@@ -52,7 +52,11 @@ app.use(
 
 app.use(
   "/graphql",
-  graphqlHTTP({ schema: graphQlSchema, rootValue: graphQlResolver })
+  graphqlHTTP({
+    schema: graphQlSchema,
+    rootValue: graphQlResolver,
+    graphiql: true,
+  })
 );
 
 // cross origine request security
