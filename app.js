@@ -50,11 +50,20 @@ app.use(
   multer({ storage: fileStorage, fileFilter: fileFilter }).single("image")
 );
 
+// app.use(
+//   "/graphql",
+//   graphqlHTTP({
+//     schema: graphQlSchema.opertaionSchema,
+//     rootValue: graphQlResolver.operation,
+//     graphiql: true,
+//   })
+// );
+
 app.use(
   "/graphql",
   graphqlHTTP({
-    schema: graphQlSchema,
-    rootValue: graphQlResolver,
+    schema: graphQlSchema.signupSchema,
+    rootValue: graphQlResolver.signup,
     graphiql: true,
   })
 );
@@ -66,6 +75,7 @@ app.use((req, res, next) => {
   res.setHeader("Access-Control-Allow-Headers", "Content-Type, Authorization");
   next();
 });
+
 
 app.use((error, req, res, next) => {
   console.log(error);
