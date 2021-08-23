@@ -7,6 +7,7 @@ const app = express();
 const { graphqlHTTP } = require("express-graphql");
 const graphQlSchema = require("./graphql/schema");
 const graphQlResolver = require("./graphql/resolvers");
+const cors = require("cors");
 
 // storage configuration....
 const fileStorage = multer.diskStorage({
@@ -44,6 +45,7 @@ mongoose
 
   .catch((err) => console.log(err));
 
+app.use(cors())
 app.use(bodyParser.json()); // to accept json data
 app.use("/images", express.static(path.join(__dirname, "images"))); // construct absolut path
 app.use(
@@ -73,6 +75,9 @@ app.use((req, res, next) => {
   res.setHeader("Access-Control-Allow-Origin", "*");
   res.setHeader("Access-Control-Allow-Method", "*");
   res.setHeader("Access-Control-Allow-Headers", "Content-Type, Authorization");
+  if (req.method === "OPTIONS") {
+    return res.sendStatus(200);
+  }
   next();
 });
 
