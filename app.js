@@ -4,10 +4,11 @@ const mongoose = require("mongoose");
 const path = require("path");
 const multer = require("multer");
 const app = express();
-const { graphqlHTTP } = require("express-graphql");
+const { ƒ } = require("express-graphql");
 const graphQlSchema = require("./graphql/schema");
 const graphQlResolver = require("./graphql/resolvers");
 const cors = require("cors");
+const auth = require("./middleware/auth")
 
 // storage configuration....
 const fileStorage = multer.diskStorage({
@@ -52,6 +53,8 @@ app.use(
   multer({ storage: fileStorage, fileFilter: fileFilter }).single("image")
 );
 
+app.use(auth)
+
 app.use(
   "/graphql",
   graphqlHTTP({
@@ -62,7 +65,7 @@ app.use(
       if (!err.originalError) {
         return err;
       }
-      const data = err.originalError.data;
+      const data = err.originalError.data || "Data error";
       const message = err.message || "error occurd";
       const code = err.originalError.code || 500;
       return { message, status: code, data };

@@ -8,8 +8,8 @@ exports.signupSchema = buildSchema(`
         content: String!
         imageUrl: String!
         creator: User!
-        createAt: String!
-        updateAt: String!
+        createdAt: String!
+        updatedAt: String!
     }
 
     type User {
@@ -21,8 +21,9 @@ exports.signupSchema = buildSchema(`
         posts: [Post!]!
     }
 
-    type rootQuery {
-        hello : String!
+    type AuthData {
+        token: String!
+        userId: String!
     }
 
     input UserInputData {
@@ -31,8 +32,25 @@ exports.signupSchema = buildSchema(`
         password: String!
     }
 
+    input PostInputData {
+        title : String!
+        content : String!
+        imageUrl : String!
+    }
+    
+    type postData {
+        posts: [Post!]!
+        totalPosts: Int!
+    }
+
+    type rootQuery {
+        login(email: String!, password: String!): AuthData 
+        posts: postData!
+    }
+
     type RootMutation {
         createUser(userInput: UserInputData): User!
+        createPost(postInput : PostInputData): Post!
     }
 
     schema {
@@ -43,24 +61,3 @@ exports.signupSchema = buildSchema(`
 `);
 
 
-exports.opertaionSchema = buildSchema(`
-
-    input inputOperationSchema {
-        num1 : Int!
-        num2 : Int!
-    }
-
-    type operation {
-        resolveOperation(userInput : inputOperationSchema): Int!
-    }
-
-    type rootQuery {
-        hello : String!
-    }
-
-    schema {
-        query : rootQuery
-        mutation : operation
-    }
-
-`);
