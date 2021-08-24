@@ -4,11 +4,13 @@ const mongoose = require("mongoose");
 const path = require("path");
 const multer = require("multer");
 const app = express();
-const { ƒ } = require("express-graphql");
+const { graphqlHTTP } = require("express-graphql");
 const graphQlSchema = require("./graphql/schema");
 const graphQlResolver = require("./graphql/resolvers");
 const cors = require("cors");
-const auth = require("./middleware/auth")
+const auth = require("./middleware/auth");
+const fs = require("fs");
+const { clear } = require("console");
 
 // storage configuration....
 const fileStorage = multer.diskStorage({
@@ -46,14 +48,30 @@ mongoose
 
   .catch((err) => console.log(err));
 
-app.use(cors())
-app.use(bodyParser.json()); // to accept json data
+app.use(cors());
 app.use("/images", express.static(path.join(__dirname, "images"))); // construct absolut path
+app.use(bodyParser.json()); // to accept json data
 app.use(
   multer({ storage: fileStorage, fileFilter: fileFilter }).single("image")
 );
 
-app.use(auth)
+app.use(auth);
+
+app.put("/post-images", (req, res, next) => {
+  console.log("reaching this rout " , req.body)
+  if(!req.isAuth){
+    throw new Error("Not auth");
+  }
+  if (!req.file) {
+    return res.status(200).json({ message: "No image provided!" });
+  }
+  if (req.body.oldPath) {
+    clearImage(req.body.oldPath); // if user update post without new image provided
+  }
+  return res
+    .status(201)
+    .json({ message: "file stored", filePath: req.file.path });
+});
 
 app.use(
   "/graphql",
@@ -90,3 +108,8 @@ app.use((error, req, res, next) => {
   const data = error.data;
   res.status(status).json({ message: error.message, data: data });
 });
+
+const clearImage = (filePath) => {
+  filePath = path.join(__dirname, "..", filePath);
+  fs.unlink(filePath, (err) => console.log(err));
+};

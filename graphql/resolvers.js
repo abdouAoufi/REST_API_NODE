@@ -71,6 +71,7 @@ exports.signup = {
   },
 
   createPost: async function ({ postInput }, req) {
+    console.log("executing")
     if (!req.isAuth) {
       const error = new Error("Not auth");
       error.code = 401;
@@ -102,6 +103,7 @@ exports.signup = {
       error.code = 401;
       throw error;
     }
+    console.log(postInput)
     const post = new Post({
       title: postInput.title,
       imageUrl: postInput.imageUrl,
